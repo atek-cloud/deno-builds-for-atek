@@ -1,0 +1,19 @@
+{
+  "name": "build",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.1.0",
+    "@esbuild-plugins/node-modules-polyfill": "^0.1.1",
+    "esbuild": "^0.12.20"
+  }
+}
