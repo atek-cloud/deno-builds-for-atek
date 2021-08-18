@@ -26,6 +26,7 @@ export async function createWsStream (url: string) {
       stream.push(Buffer.from(e.data))
     }
   }
+
   return stream
 }
 

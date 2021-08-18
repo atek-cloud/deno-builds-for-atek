@@ -1,25 +1,56 @@
-import { Project, ScriptTarget } from 'ts-morph'
+// import { Project, ScriptTarget } from 'ts-morph'
+// import sh from 'shelljs'
 import GlobalsPolyfills from '@esbuild-plugins/node-globals-polyfill'
 import NodeModulesPolyfills from '@esbuild-plugins/node-modules-polyfill'
 import { build } from 'esbuild'
 import fs from 'fs'
 import path from 'path'
-import sh from 'shelljs'
 
 const hcPkg = JSON.parse(fs.readFileSync(path.join('hyperspace-client', 'package.json'), 'utf8'))
 const hbeePkg = JSON.parse(fs.readFileSync(path.join('hyperbee', 'package.json'), 'utf8'))
 
+const BUFFER_MISSING_METHODS = `
+Buffer.compare = function compare(a, b) {
+  // TODO
+  // if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
+  //     throw new TypeError('Arguments must be Buffers')
+  // }
+
+  if (a === b) return 0
+
+  var x = a.length
+  var y = b.length
+
+  for (var i = 0, len = Math.min(x, y); i < len; ++i) {
+      if (a[i] !== b[i]) {
+          x = a[i]
+          y = b[i]
+          break
+      }
+  }
+
+  if (x < y) return -1
+  if (y < x) return 1
+  return 0
+}
+`
+
 build({
   format: 'esm',
   entryPoints: ['hyperspace-client/index.js'],
+  
   bundle: true,
   platform: 'node',
   outfile: `dist/hyperspace-client.${hcPkg.version}.build.js`,
-  banner: {js: 'const global = {}\n'}, // for some reason this doesn't get done and we need it
+  banner: {js: `
+const global = {}
+import Buffer from 'https://deno.land/std@0.76.0/node/buffer.ts';
+${BUFFER_MISSING_METHODS}
+`},
   plugins: [
     GlobalsPolyfills.NodeGlobalsPolyfillPlugin({
       process: true,
-      buffer: true
+      // buffer: true
     }),
     NodeModulesPolyfills.NodeModulesPolyfillPlugin()
   ],
@@ -31,11 +62,15 @@ build({
   bundle: true,
   platform: 'node',
   outfile: `dist/hyperbee.${hbeePkg.version}.build.js`,
-  banner: {js: 'const global = {}\n'}, // for some reason this doesn't get done and we need it
+  banner: {js: `
+const global = {}
+import Buffer from 'https://deno.land/std@0.76.0/node/buffer.ts';
+${BUFFER_MISSING_METHODS}
+`},
   plugins: [
     GlobalsPolyfills.NodeGlobalsPolyfillPlugin({
       process: true,
-      buffer: true
+      // buffer: true
     }),
     NodeModulesPolyfills.NodeModulesPolyfillPlugin()
   ],
